@@ -22,6 +22,7 @@
             border: 1px solid #ccc;
             padding: 20px;
             box-sizing: border-box;
+            position: relative;
         }
         .calculator h2 {
             margin-top: 0;
@@ -30,7 +31,7 @@
             display: block;
             margin: 10px 0 5px;
         }
-        .calculator input[type="date"],
+        .calculator input[type="text"],
         .calculator input[type="number"] {
             width: 100%;
             padding: 8px;
@@ -66,9 +67,57 @@
             color: #555;
             margin-top: 5px;
         }
+        /* Date picker styles */
+        .datepicker {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            z-index: 1000;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .datepicker table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .datepicker th, .datepicker td {
+            width: 14.28%;
+            text-align: center;
+            padding: 5px;
+        }
+        .datepicker th {
+            background: #f0f0f0;
+        }
+        .datepicker td {
+            cursor: pointer;
+        }
+        .datepicker td:hover {
+            background: #e0e0e0;
+        }
+        .datepicker .selected {
+            background: #007bff;
+            color: #fff;
+        }
+.date-picker-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    vertical-align: middle;
+    margin-left: 5px;
+    position: relative;
+    top: -10px; /* Adjust this value as needed */
+}
+        /* Responsive styles */
         @media (max-width: 768px) {
+            .calculator-container {
+                display: block;
+            }
             .calculator {
-                flex: 1 1 100%;
+                flex: none;
+                width: 100%;
+                margin-bottom: 20px;
             }
         }
     </style>
@@ -85,8 +134,12 @@
     <!-- Calculator 1: How long ago/until -->
     <div class="calculator" id="calculator1">
         <h2>How long ago/until</h2>
-        <label for="date1">Select Date:</label>
-        <input type="date" id="date1" placeholder="dd/mm/yyyy">
+        <label for="date1">Select Date:
+            <button class="date-picker-button" onclick="openDatePicker('date1')">
+                📅
+            </button>
+        </label>
+        <input type="text" id="date1" placeholder="dd/mm/yyyy">
         <div class="date-adjustment">
             <label>Adjust Date1:</label>
             <button onclick="adjustDate('date1', 'years', 1)">+1 Year</button>
@@ -96,8 +149,12 @@
             <button onclick="adjustDate('date1', 'months', -1)">-1 Month</button>
             <button onclick="adjustDate('date1', 'days', -1)">-1 Day</button>
         </div>
-        <label for="date2">Second Date (optional):</label>
-        <input type="date" id="date2" placeholder="dd/mm/yyyy">
+        <label for="date2">Second Date (optional):
+            <button class="date-picker-button" onclick="openDatePicker('date2')">
+                📅
+            </button>
+        </label>
+        <input type="text" id="date2" placeholder="dd/mm/yyyy">
         <div class="date-adjustment">
             <label>Adjust Date2:</label>
             <button onclick="adjustDate('date2', 'years', 1)">+1 Year</button>
@@ -180,8 +237,12 @@
     <!-- Calculator 6: Max Term -->
     <div class="calculator" id="calculator6">
         <h2>Max Term</h2>
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" placeholder="dd/mm/yyyy">
+        <label for="dob">Date of Birth:
+            <button class="date-picker-button" onclick="openDatePicker('dob')">
+                📅
+            </button>
+        </label>
+        <input type="text" id="dob" placeholder="dd/mm/yyyy">
         <label for="retirementAge">Retirement Age:</label>
         <input type="number" id="retirementAge" value="70" min="0">
         <div class="result" id="result6"></div>
@@ -209,7 +270,7 @@
                 } else {
                     input.value = '';
                 }
-            } else if (input.type === 'date') {
+            } else if (input.type === 'text') {
                 input.value = '';
             }
         });
@@ -219,6 +280,9 @@
         results.forEach(result => {
             result.innerHTML = '';
         });
+
+        // Close any open date pickers
+        closeDatePicker();
 
         // Re-initialize calculations
         calculateDuration();
@@ -236,11 +300,15 @@
         const resultDiv = document.getElementById('result1');
 
         if (!date1Value) {
-            resultDiv.innerHTML = "Please select the first date.";
+            resultDiv.innerHTML = "Please enter the first date.";
             return;
         }
 
-        const date1 = new Date(date1Value);
+        const date1 = parseDate(date1Value);
+        if (!date1) {
+            resultDiv.innerHTML = "Please enter the first date in dd/mm/yyyy format.";
+            return;
+        }
 
         let messages = [];
 
@@ -256,13 +324,31 @@
 
         // If date2 is provided, calculate difference between date1 and date2
         if (date2Value) {
-            const date2 = new Date(date2Value);
+            const date2 = parseDate(date2Value);
+            if (!date2) {
+                resultDiv.innerHTML = "Please enter the second date in dd/mm/yyyy format.";
+                return;
+            }
             let diffBetweenDates = calculateDateDifference(date1, date2);
 
             messages.push(`${diffBetweenDates.years} years, ${diffBetweenDates.months} months, and ${diffBetweenDates.days} days between ${formatUKDate(date1)} and ${formatUKDate(date2)}.`);
         }
 
         resultDiv.innerHTML = messages.join('<br>');
+    }
+
+    // Helper function to parse date from dd/mm/yyyy format
+    function parseDate(dateStr) {
+        const parts = dateStr.split('/');
+        if (parts.length !== 3) return null;
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Months are zero-based
+        const year = parseInt(parts[2], 10);
+        const date = new Date(year, month, day);
+        if (date && date.getMonth() === month && date.getDate() === day && date.getFullYear() === year) {
+            return date;
+        }
+        return null;
     }
 
     // Helper function to calculate date difference and return an object with years, months, days
@@ -305,7 +391,11 @@
 
         let date;
         if (dateValue) {
-            date = new Date(dateValue);
+            date = parseDate(dateValue);
+            if (!date) {
+                alert("Please enter the date in dd/mm/yyyy format.");
+                return;
+            }
         } else {
             date = new Date();
         }
@@ -318,14 +408,7 @@
             date.setDate(date.getDate() + amount);
         }
 
-        // Convert date to yyyy-mm-dd format
-        let year = date.getFullYear();
-        let month = ('0' + (date.getMonth() + 1)).slice(-2); // months are zero-indexed
-        let day = ('0' + date.getDate()).slice(-2);
-
-        let newDateValue = `${year}-${month}-${day}`;
-
-        dateInput.value = newDateValue;
+        dateInput.value = formatUKDate(date);
 
         // Recalculate after adjusting date
         calculateDuration();
@@ -499,7 +582,11 @@
             return;
         }
 
-        const dob = new Date(dobValue);
+        const dob = parseDate(dobValue);
+        if (!dob) {
+            resultDiv.innerHTML = "Please enter the Date of Birth in dd/mm/yyyy format.";
+            return;
+        }
         const today = new Date();
 
         // Calculate the date when the user reaches retirement age
@@ -525,9 +612,155 @@
         return `${day}/${month}/${year}`;
     }
 
+    // Date Picker Functions
+  function openDatePicker(inputId) {
+    closeDatePicker();
+
+    const input = document.getElementById(inputId);
+    const calculator = input.closest('.calculator');
+    const datepicker = document.createElement('div');
+    datepicker.className = 'datepicker';
+
+    // Position the datepicker
+    datepicker.style.top = (input.offsetTop + input.offsetHeight + 5) + 'px';
+    datepicker.style.left = input.offsetLeft + 'px';
+
+    let selectedDate = parseDate(input.value) || new Date();
+    let currentMonth = selectedDate.getMonth();
+    let currentYear = selectedDate.getFullYear();
+
+    // Build the datepicker
+    buildDatePicker();
+
+    // Append the datepicker to the calculator
+    calculator.appendChild(datepicker);
+
+    // Prevent clicks inside the datepicker from closing it
+    datepicker.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    // Function to build the datepicker
+    function buildDatePicker() {
+        datepicker.innerHTML = '';
+        const header = document.createElement('div');
+        header.style.textAlign = 'center';
+        header.style.marginBottom = '5px';
+
+        const prevButton = document.createElement('button');
+        prevButton.textContent = '<';
+        prevButton.onclick = function (event) {
+            event.stopPropagation();
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            buildDatePicker();
+        };
+        const nextButton = document.createElement('button');
+        nextButton.textContent = '>';
+        nextButton.style.marginLeft = '5px';
+        nextButton.onclick = function (event) {
+            event.stopPropagation();
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            buildDatePicker();
+        };
+        const monthYear = document.createElement('span');
+        monthYear.textContent = `${getMonthName(currentMonth)} ${currentYear}`;
+        monthYear.style.margin = '0 10px';
+
+        header.appendChild(prevButton);
+        header.appendChild(monthYear);
+        header.appendChild(nextButton);
+        datepicker.appendChild(header);
+
+        const table = document.createElement('table');
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        daysOfWeek.forEach(day => {
+            const th = document.createElement('th');
+            th.textContent = day;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        let date = 1;
+
+        for (let i = 0; i < 6; i++) {
+            const row = document.createElement('tr');
+            for (let j = 0; j < 7; j++) {
+                const cell = document.createElement('td');
+                if (i === 0 && j < firstDay) {
+                    cell.textContent = '';
+                } else if (date > daysInMonth) {
+                    cell.textContent = '';
+                } else {
+                    cell.textContent = date;
+
+                    // Capture the current value of date
+                    (function(d) {
+                        cell.onclick = function (event) {
+                            event.stopPropagation();
+                            selectedDate = new Date(currentYear, currentMonth, d);
+                            input.value = formatUKDate(selectedDate);
+                            closeDatePicker();
+                            // Trigger calculation
+                            if (inputId === 'date1' || inputId === 'date2') {
+                                calculateDuration();
+                            } else if (inputId === 'dob') {
+                                calculateMaxTerm();
+                            }
+                        };
+                    })(date);
+
+                    if (date === selectedDate.getDate() && currentMonth === selectedDate.getMonth() && currentYear === selectedDate.getFullYear()) {
+                        cell.classList.add('selected');
+                    }
+                    date++; // Increment date after setting up event handler
+                }
+                row.appendChild(cell);
+            }
+            tbody.appendChild(row);
+        }
+        table.appendChild(tbody);
+        datepicker.appendChild(table);
+    }
+}
+
+
+function closeDatePicker() {
+    const datepickers = document.querySelectorAll('.datepicker');
+    datepickers.forEach(dp => dp.parentNode.removeChild(dp));
+}
+
+function getMonthName(monthIndex) {
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return monthNames[monthIndex];
+}
+
+// Close datepicker when clicking outside
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.datepicker') && !event.target.classList.contains('date-picker-button')) {
+        closeDatePicker();
+    }
+});
+
     // Event listeners for automatic calculations
-    document.getElementById('date1').addEventListener('change', calculateDuration);
-    document.getElementById('date2').addEventListener('change', calculateDuration);
+    document.getElementById('date1').addEventListener('input', calculateDuration);
+    document.getElementById('date2').addEventListener('input', calculateDuration);
 
     document.getElementById('yearsInput').addEventListener('input', calculateFuturePastDate);
     document.getElementById('monthsInput').addEventListener('input', calculateFuturePastDate);
@@ -541,18 +774,18 @@
 
     document.getElementById('valuationAmount').addEventListener('input', calculateLTV);
 
-    document.getElementById('loanAmountLTV').addEventListener('input', function() {
+    document.getElementById('loanAmountLTV').addEventListener('input', function () {
         document.getElementById('ltvPercentage').value = '';
         calculateLTV();
     });
 
-    document.getElementById('ltvPercentage').addEventListener('input', function() {
+    document.getElementById('ltvPercentage').addEventListener('input', function () {
         if (!document.getElementById('loanAmountLTV').value) {
             calculateLTV();
         }
     });
 
-    document.getElementById('dob').addEventListener('change', calculateMaxTerm);
+    document.getElementById('dob').addEventListener('input', calculateMaxTerm);
     document.getElementById('retirementAge').addEventListener('input', calculateMaxTerm);
 
     // Initial calculations
