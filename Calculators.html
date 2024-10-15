@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+    <meta charset="UTF-8">
+    <title>Custom Calculators</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .reset-button {
+            margin-bottom: 20px;
+        }
+        .calculator-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .calculator {
+            flex: 1 1 calc(50% - 40px);
+            min-width: 300px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .calculator h2 {
+            margin-top: 0;
+        }
+        .calculator label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        .calculator input[type="date"],
+        .calculator input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .calculator button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            margin-right: 10px;
+        }
+        .date-adjustment, .value-adjustment, .ltv-buttons {
+            margin: 10px 0;
+        }
+        .date-adjustment label,
+        .value-adjustment label,
+        .ltv-buttons label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .date-adjustment button,
+        .value-adjustment button,
+        .ltv-buttons button {
+            margin: 2px 2px 2px 0;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .result {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .description {
+            font-size: 12px;
+            color: #555;
+            margin-top: 5px;
+        }
+        @media (max-width: 768px) {
+            .calculator {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Reset Button -->
+<div class="reset-button">
+    <button onclick="resetAll()">Reset All</button>
+</div>
+
+<div class="calculator-container">
+
+    <!-- Calculator 1: How long ago/until -->
+    <div class="calculator" id="calculator1">
+        <h2>How long ago/until</h2>
+        <label for="date1">Select Date:</label>
+        <input type="date" id="date1" placeholder="dd/mm/yyyy">
+        <div class="date-adjustment">
+            <label>Adjust Date1:</label>
+            <button onclick="adjustDate('date1', 'years', 1)">+1 Year</button>
+            <button onclick="adjustDate('date1', 'months', 1)">+1 Month</button>
+            <button onclick="adjustDate('date1', 'days', 1)">+1 Day</button>
+            <button onclick="adjustDate('date1', 'years', -1)">-1 Year</button>
+            <button onclick="adjustDate('date1', 'months', -1)">-1 Month</button>
+            <button onclick="adjustDate('date1', 'days', -1)">-1 Day</button>
+        </div>
+        <label for="date2">Second Date (optional):</label>
+        <input type="date" id="date2" placeholder="dd/mm/yyyy">
+        <div class="date-adjustment">
+            <label>Adjust Date2:</label>
+            <button onclick="adjustDate('date2', 'years', 1)">+1 Year</button>
+            <button onclick="adjustDate('date2', 'months', 1)">+1 Month</button>
+            <button onclick="adjustDate('date2', 'days', 1)">+1 Day</button>
+            <button onclick="adjustDate('date2', 'years', -1)">-1 Year</button>
+            <button onclick="adjustDate('date2', 'months', -1)">-1 Month</button>
+            <button onclick="adjustDate('date2', 'days', -1)">-1 Day</button>
+        </div>
+        <div class="result" id="result1"></div>
+    </div>
+
+    <!-- Calculator 2: How long ago/until (Years and Months) -->
+    <div class="calculator" id="calculator2">
+        <h2>How long ago/until (Years and Months)</h2>
+        <label for="yearsInput">Years:</label>
+        <input type="number" id="yearsInput" min="0" value="0">
+        <div class="value-adjustment">
+            <button onclick="adjustValue('yearsInput', 1)">+1 Year</button>
+            <button onclick="adjustValue('yearsInput', -1)">-1 Year</button>
+        </div>
+        <label for="monthsInput">Months:</label>
+        <input type="number" id="monthsInput" min="0" value="0">
+        <div class="value-adjustment">
+            <button onclick="adjustValue('monthsInput', 1)">+1 Month</button>
+            <button onclick="adjustValue('monthsInput', -1)">-1 Month</button>
+        </div>
+        <div class="result" id="result2"></div>
+    </div>
+
+    <!-- Calculator 3: Date Until Paid Off -->
+    <div class="calculator" id="calculator3">
+        <h2>Date Until Paid Off</h2>
+        <label for="loanAmount">Loan Amount (£):</label>
+        <input type="number" id="loanAmount" min="0" step="0.01">
+        <label for="paymentAmount">Payment Amount (£):</label>
+        <input type="number" id="paymentAmount" min="0" step="0.01">
+        <div class="description">"CC Payment" calculates 3% of the loan amount and fills in the payment value.</div>
+        <button onclick="calculateCCPayment()">CC Payment</button>
+        <div class="result" id="result3"></div>
+    </div>
+
+    <!-- Calculator 4: Child Benefit Calculator -->
+    <div class="calculator" id="calculator4">
+        <h2>Child Benefit Calculator</h2>
+        <label for="firstChild">1st Child (£):</label>
+        <input type="number" id="firstChild" value="25.60" step="0.01">
+        <label for="additionalChild">Additional Child (£):</label>
+        <input type="number" id="additionalChild" value="16.95" step="0.01">
+        <label for="numberOfChildren">Number of Children:</label>
+        <input type="number" id="numberOfChildren" min="1" value="1">
+        <div class="result" id="result4"></div>
+    </div>
+
+    <!-- Calculator 5: LTV Calculator -->
+    <div class="calculator" id="calculator5">
+        <h2>LTV Calculator</h2>
+        <label for="valuationAmount">Valuation (£):</label>
+        <input type="number" id="valuationAmount" min="0" step="0.01">
+        <label for="loanAmountLTV">Loan (£):</label>
+        <input type="number" id="loanAmountLTV" min="0" step="0.01">
+        <label for="ltvPercentage">LTV (%):</label>
+        <input type="number" id="ltvPercentage" min="0" max="100" step="0.01">
+        <div class="ltv-buttons">
+            <label>Select LTV Percentage:</label>
+            <button onclick="setLTV(95)">95%</button>
+            <button onclick="setLTV(90)">90%</button>
+            <button onclick="setLTV(85)">85%</button>
+            <button onclick="setLTV(80)">80%</button>
+            <button onclick="setLTV(75)">75%</button>
+            <button onclick="setLTV(70)">70%</button>
+            <button onclick="setLTV(65)">65%</button>
+            <button onclick="setLTV(60)">60%</button>
+            <button onclick="setLTV(55)">55%</button>
+            <button onclick="setLTV(50)">50%</button>
+        </div>
+        <div class="result" id="result5"></div>
+    </div>
+
+    <!-- Calculator 6: Max Term -->
+    <div class="calculator" id="calculator6">
+        <h2>Max Term</h2>
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" placeholder="dd/mm/yyyy">
+        <label for="retirementAge">Retirement Age:</label>
+        <input type="number" id="retirementAge" value="70" min="0">
+        <div class="result" id="result6"></div>
+    </div>
+
+</div>
+
+<script>
+    // Reset function
+    function resetAll() {
+        // Reset all input fields to their initial values
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            if (input.type === 'number') {
+                if (input.id === 'yearsInput' || input.id === 'monthsInput') {
+                    input.value = '0';
+                } else if (input.id === 'retirementAge') {
+                    input.value = '70';
+                } else if (input.id === 'firstChild') {
+                    input.value = '25.60';
+                } else if (input.id === 'additionalChild') {
+                    input.value = '16.95';
+                } else if (input.id === 'numberOfChildren') {
+                    input.value = '1';
+                } else {
+                    input.value = '';
+                }
+            } else if (input.type === 'date') {
+                input.value = '';
+            }
+        });
+
+        // Clear all result divs
+        const results = document.querySelectorAll('.result');
+        results.forEach(result => {
+            result.innerHTML = '';
+        });
+
+        // Re-initialize calculations
+        calculateDuration();
+        calculateFuturePastDate();
+        calculatePayoffDate();
+        calculateChildBenefit();
+        calculateLTV();
+        calculateMaxTerm();
+    }
+
+    // Calculator 1: How long ago/until
+    function calculateDuration() {
+        const date1Value = document.getElementById('date1').value;
+        const date2Value = document.getElementById('date2').value;
+        const resultDiv = document.getElementById('result1');
+
+        if (!date1Value) {
+            resultDiv.innerHTML = "Please select the first date.";
+            return;
+        }
+
+        const date1 = new Date(date1Value);
+
+        let messages = [];
+
+        // Calculate difference between date1 and today
+        const today = new Date();
+        let diffWithToday = calculateDateDifference(date1, today);
+
+        if (diffWithToday.isPast) {
+            messages.push(`${diffWithToday.years} years, ${diffWithToday.months} months, and ${diffWithToday.days} days have passed since ${formatUKDate(date1)}.`);
+        } else {
+            messages.push(`${diffWithToday.years} years, ${diffWithToday.months} months, and ${diffWithToday.days} days left until ${formatUKDate(date1)}.`);
+        }
+
+        // If date2 is provided, calculate difference between date1 and date2
+        if (date2Value) {
+            const date2 = new Date(date2Value);
+            let diffBetweenDates = calculateDateDifference(date1, date2);
+
+            messages.push(`${diffBetweenDates.years} years, ${diffBetweenDates.months} months, and ${diffBetweenDates.days} days between ${formatUKDate(date1)} and ${formatUKDate(date2)}.`);
+        }
+
+        resultDiv.innerHTML = messages.join('<br>');
+    }
+
+    // Helper function to calculate date difference and return an object with years, months, days
+    function calculateDateDifference(startDate, endDate) {
+        let isPast = endDate >= startDate;
+
+        let start = new Date(startDate);
+        let end = new Date(endDate);
+
+        if (!isPast) {
+            // Swap dates if endDate is before startDate
+            [start, end] = [end, start];
+        }
+
+        let years = end.getFullYear() - start.getFullYear();
+        let months = end.getMonth() - start.getMonth();
+        let days = end.getDate() - start.getDate();
+
+        if (days < 0) {
+            months--;
+            days += new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        return {
+            years: years,
+            months: months,
+            days: days,
+            isPast: isPast
+        };
+    }
+
+    // Function to adjust date inputs
+    function adjustDate(dateFieldId, unit, amount) {
+        let dateInput = document.getElementById(dateFieldId);
+        let dateValue = dateInput.value;
+
+        let date;
+        if (dateValue) {
+            date = new Date(dateValue);
+        } else {
+            date = new Date();
+        }
+
+        if (unit === 'years') {
+            date.setFullYear(date.getFullYear() + amount);
+        } else if (unit === 'months') {
+            date.setMonth(date.getMonth() + amount);
+        } else if (unit === 'days') {
+            date.setDate(date.getDate() + amount);
+        }
+
+        // Convert date to yyyy-mm-dd format
+        let year = date.getFullYear();
+        let month = ('0' + (date.getMonth() + 1)).slice(-2); // months are zero-indexed
+        let day = ('0' + date.getDate()).slice(-2);
+
+        let newDateValue = `${year}-${month}-${day}`;
+
+        dateInput.value = newDateValue;
+
+        // Recalculate after adjusting date
+        calculateDuration();
+    }
+
+    // Calculator 2: How long ago/until (Years and Months)
+    function calculateFuturePastDate() {
+        const years = parseInt(document.getElementById('yearsInput').value) || 0;
+        const months = parseInt(document.getElementById('monthsInput').value) || 0;
+        const resultDiv = document.getElementById('result2');
+
+        let currentDate = new Date();
+
+        // Future Date
+        let futureDate = new Date(currentDate);
+        futureDate.setFullYear(futureDate.getFullYear() + years);
+        futureDate.setMonth(futureDate.getMonth() + months);
+
+        // Past Date
+        let pastDate = new Date(currentDate);
+        pastDate.setFullYear(pastDate.getFullYear() - years);
+        pastDate.setMonth(pastDate.getMonth() - months);
+
+        const futureFormattedDate = formatUKDate(futureDate);
+        const pastFormattedDate = formatUKDate(pastDate);
+
+        const message = `Future date: ${futureFormattedDate}<br>Past date: ${pastFormattedDate}`;
+
+        resultDiv.innerHTML = message;
+    }
+
+    // Function to adjust number inputs
+    function adjustValue(inputId, amount) {
+        const input = document.getElementById(inputId);
+        let value = parseInt(input.value) || 0;
+        value += amount;
+        if (value < 0) value = 0;
+        input.value = value;
+
+        // Recalculate after adjusting value
+        calculateFuturePastDate();
+    }
+
+    // Calculator 3: Date Until Paid Off
+    function calculatePayoffDate() {
+        const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+        const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+        const resultDiv = document.getElementById('result3');
+
+        if (!loanAmount || !paymentAmount) {
+            resultDiv.innerHTML = "Please fill in both Loan Amount and Payment Amount.";
+            return;
+        }
+
+        const startDate = new Date();
+        const numberOfPayments = Math.ceil(loanAmount / paymentAmount);
+        const payoffDate = new Date(startDate);
+        payoffDate.setMonth(payoffDate.getMonth() + numberOfPayments);
+
+        let diff = payoffDate - startDate;
+
+        let years = payoffDate.getFullYear() - startDate.getFullYear();
+        let months = payoffDate.getMonth() - startDate.getMonth();
+        let days = payoffDate.getDate() - startDate.getDate();
+
+        if (days < 0) {
+            months--;
+            days += new Date(payoffDate.getFullYear(), payoffDate.getMonth(), 0).getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        const formattedPayoffDate = formatUKDate(payoffDate);
+        const message = `The loan will be paid off by ${formattedPayoffDate}.<br>Remaining time: ${years} years, ${months} months, and ${days} days.`;
+
+        resultDiv.innerHTML = message;
+    }
+
+    function calculateCCPayment() {
+        const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+        if (!loanAmount) {
+            alert("Please enter the Loan Amount first.");
+            return;
+        }
+        const ccPayment = loanAmount * 0.03;
+        document.getElementById('paymentAmount').value = ccPayment.toFixed(2);
+
+        // Recalculate after updating payment amount
+        calculatePayoffDate();
+    }
+
+    // Calculator 4: Child Benefit Calculator
+    function calculateChildBenefit() {
+        const firstChildAmount = parseFloat(document.getElementById('firstChild').value);
+        const additionalChildAmount = parseFloat(document.getElementById('additionalChild').value);
+        const numberOfChildren = parseInt(document.getElementById('numberOfChildren').value);
+        const resultDiv = document.getElementById('result4');
+
+        if (numberOfChildren < 1) {
+            resultDiv.innerHTML = "Number of children must be at least 1.";
+            return;
+        }
+
+        const firstChildTotal = firstChildAmount * 52;
+        const additionalChildrenTotal = additionalChildAmount * 52 * (numberOfChildren - 1);
+        const totalBenefit = firstChildTotal + additionalChildrenTotal;
+
+        const formattedTotalBenefit = totalBenefit.toLocaleString('en-GB', {
+            style: 'currency',
+            currency: 'GBP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        resultDiv.innerHTML = `Total annual child benefit is ${formattedTotalBenefit}.`;
+    }
+
+    // Calculator 5: LTV Calculator
+    function calculateLTV() {
+        const valuationAmount = parseFloat(document.getElementById('valuationAmount').value);
+        const loanAmount = parseFloat(document.getElementById('loanAmountLTV').value);
+        const ltvPercentage = parseFloat(document.getElementById('ltvPercentage').value);
+        const resultDiv = document.getElementById('result5');
+
+        if (!valuationAmount) {
+            resultDiv.innerHTML = "Please enter the Valuation amount.";
+            return;
+        }
+
+        if (loanAmount) {
+            // Loan amount is provided, calculate LTV%
+            const calculatedLTV = (loanAmount / valuationAmount) * 100;
+            document.getElementById('ltvPercentage').value = calculatedLTV.toFixed(2);
+
+            const formattedLTV = calculatedLTV.toFixed(2) + '%';
+            resultDiv.innerHTML = `The LTV is ${formattedLTV}.`;
+        } else if (ltvPercentage) {
+            // LTV% is provided, calculate Loan amount
+            const calculatedLoanAmount = (ltvPercentage / 100) * valuationAmount;
+
+            document.getElementById('loanAmountLTV').value = calculatedLoanAmount.toFixed(2);
+
+            const formattedLoanAmount = calculatedLoanAmount.toLocaleString('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            resultDiv.innerHTML = `The loan amount is ${formattedLoanAmount}.`;
+        } else {
+            resultDiv.innerHTML = "Please enter either the Loan amount or LTV percentage.";
+        }
+    }
+
+    function setLTV(value) {
+        document.getElementById('ltvPercentage').value = value;
+        document.getElementById('loanAmountLTV').value = '';
+        calculateLTV();
+    }
+
+    // Calculator 6: Max Term
+    function calculateMaxTerm() {
+        const dobValue = document.getElementById('dob').value;
+        const retirementAge = parseInt(document.getElementById('retirementAge').value);
+        const resultDiv = document.getElementById('result6');
+
+        if (!dobValue || !retirementAge) {
+            resultDiv.innerHTML = "Please enter your Date of Birth and Retirement Age.";
+            return;
+        }
+
+        const dob = new Date(dobValue);
+        const today = new Date();
+
+        // Calculate the date when the user reaches retirement age
+        const retirementDate = new Date(dob);
+        retirementDate.setFullYear(dob.getFullYear() + retirementAge);
+
+        // Calculate the difference in years, rounding down
+        const diffTime = retirementDate - today;
+        const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+
+        const message = diffYears >= 0
+            ? `You have ${diffYears} years until retirement age.`
+            : `You have already reached the retirement age.`;
+
+        resultDiv.innerHTML = message;
+    }
+
+    // Helper function to format date in UK format
+    function formatUKDate(date) {
+        const day = ('0' + date.getDate()).slice(-2);
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    // Event listeners for automatic calculations
+    document.getElementById('date1').addEventListener('change', calculateDuration);
+    document.getElementById('date2').addEventListener('change', calculateDuration);
+
+    document.getElementById('yearsInput').addEventListener('input', calculateFuturePastDate);
+    document.getElementById('monthsInput').addEventListener('input', calculateFuturePastDate);
+
+    document.getElementById('loanAmount').addEventListener('input', calculatePayoffDate);
+    document.getElementById('paymentAmount').addEventListener('input', calculatePayoffDate);
+
+    document.getElementById('firstChild').addEventListener('input', calculateChildBenefit);
+    document.getElementById('additionalChild').addEventListener('input', calculateChildBenefit);
+    document.getElementById('numberOfChildren').addEventListener('input', calculateChildBenefit);
+
+    document.getElementById('valuationAmount').addEventListener('input', calculateLTV);
+
+    document.getElementById('loanAmountLTV').addEventListener('input', function() {
+        document.getElementById('ltvPercentage').value = '';
+        calculateLTV();
+    });
+
+    document.getElementById('ltvPercentage').addEventListener('input', function() {
+        if (!document.getElementById('loanAmountLTV').value) {
+            calculateLTV();
+        }
+    });
+
+    document.getElementById('dob').addEventListener('change', calculateMaxTerm);
+    document.getElementById('retirementAge').addEventListener('input', calculateMaxTerm);
+
+    // Initial calculations
+    calculateDuration();
+    calculateFuturePastDate();
+    calculatePayoffDate();
+    calculateChildBenefit();
+    calculateLTV();
+    calculateMaxTerm();
+</script>
+
+</body>
+</html>
