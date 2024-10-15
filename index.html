@@ -3,71 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <title>Custom Calculators</title>
+    <!-- **1. Add the Viewport Meta Tag** -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* **Global Styles** */
+        *, *::before, *::after {
+            box-sizing: border-box; /* Ensures padding and borders are included in total width and height */
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            max-width: 100%;
         }
+
         .reset-button {
             margin-bottom: 20px;
+            text-align: center; /* Center the reset button */
         }
+
+        .reset-button button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* **Calculator Container with CSS Grid** */
         .calculator-container {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr; /* Single column by default */
             gap: 20px;
+            max-width: 100%;
         }
+
+        /* **Media Query for Larger Screens (≥768px)** */
+        @media (min-width: 768px) {
+            .calculator-container {
+                grid-template-columns: repeat(2, 1fr); /* Two columns */
+            }
+        }
+
+        /* **Calculator Card Styles** */
         .calculator {
-            flex: 1 1 calc(50% - 20px);
-            min-width: 300px;
             border: 1px solid #ccc;
             padding: 20px;
-            box-sizing: border-box;
             position: relative;
+            background-color: #f9f9f9; /* Optional: Slight background color for better visibility */
+            border-radius: 5px; /* Optional: Rounded corners */
         }
+
         .calculator h2 {
             margin-top: 0;
+            font-size: 1.2em;
+            margin-bottom: 15px;
         }
+
         .calculator label {
             display: block;
             margin: 10px 0 5px;
+            font-weight: bold;
         }
+
         .calculator input[type="text"],
         .calculator input[type="number"] {
             width: 100%;
             padding: 8px;
-            box-sizing: border-box;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
         }
+
         .calculator button {
-            margin-top: 15px;
-            padding: 10px 15px;
-            margin-right: 10px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: white;
         }
+
+        .calculator button:hover {
+            background-color: #0056b3;
+        }
+
         .date-adjustment, .value-adjustment, .ltv-buttons {
             margin: 10px 0;
         }
+
         .date-adjustment label,
         .value-adjustment label,
         .ltv-buttons label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
         }
+
         .date-adjustment button,
         .value-adjustment button,
         .ltv-buttons button {
             margin: 2px 2px 2px 0;
             padding: 5px 10px;
             font-size: 12px;
+            border: 1px solid #007bff;
+            background-color: white;
+            color: #007bff;
+            border-radius: 3px;
+            cursor: pointer;
         }
+
+        .date-adjustment button:hover,
+        .value-adjustment button:hover,
+        .ltv-buttons button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
         .result {
             margin-top: 15px;
             font-weight: bold;
+            color: #333;
         }
+
         .description {
             font-size: 12px;
             color: #555;
             margin-top: 5px;
         }
-        /* Date picker styles */
+
+        /* **Date Picker Styles** */
         .datepicker {
             position: absolute;
             top: 60px;
@@ -76,29 +141,39 @@
             background: #fff;
             border: 1px solid #ccc;
             padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
+
         .datepicker table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .datepicker th, .datepicker td {
             width: 14.28%;
             text-align: center;
             padding: 5px;
         }
+
         .datepicker th {
             background: #f0f0f0;
         }
+
         .datepicker td {
             cursor: pointer;
+            border-radius: 3px;
         }
+
         .datepicker td:hover {
             background: #e0e0e0;
         }
+
         .datepicker .selected {
             background: #007bff;
             color: #fff;
         }
+
         .date-picker-button {
             background: transparent;
             border: none;
@@ -107,17 +182,36 @@
             vertical-align: middle;
             margin-left: 5px;
             position: relative;
-            top: -10px;
+            top: -3px;
         }
-        /* Responsive styles */
+
+        /* **New CSS Class for Navigation Buttons (Optional)** */
+        /* Uncomment if using CSS classes for navigation buttons */
+
+        /*
+        .nav-button {
+            margin: 2px;
+            padding: 2px 5px;
+            font-size: 14px;
+            border: 1px solid #007bff;
+            background-color: white;
+            color: #007bff;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .nav-button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        */
+
+        /* **Optional: Enhance Mobile Experience** */
         @media (max-width: 767px) {
-            .calculator-container {
-                flex-direction: column;
-            }
             .calculator {
-                flex: none;
                 width: 100%;
                 margin-bottom: 20px;
+                /* min-width: auto; Already handled by grid-template-columns */
             }
         }
     </style>
@@ -251,6 +345,9 @@
 </div>
 
 <script>
+    // **JavaScript Functions**
+    // [Your existing JavaScript code remains unchanged]
+    
     // Reset function
     function resetAll() {
         // Reset all input fields to their initial values
@@ -267,6 +364,12 @@
                     input.value = '16.95';
                 } else if (input.id === 'numberOfChildren') {
                     input.value = '1';
+                } else if (input.id === 'valuationAmount') {
+                    input.value = '';
+                } else if (input.id === 'loanAmountLTV') {
+                    input.value = '';
+                } else if (input.id === 'ltvPercentage') {
+                    input.value = '';
                 } else {
                     input.value = '';
                 }
@@ -293,122 +396,121 @@
         calculateMaxTerm();
     }
 
-// Calculator 1: How long ago/until
-function calculateDuration() {
-    const date1Value = document.getElementById('date1').value;
-    const date2Value = document.getElementById('date2').value;
-    const resultDiv = document.getElementById('result1');
+    // Calculator 1: How long ago/until
+    function calculateDuration() {
+        const date1Value = document.getElementById('date1').value;
+        const date2Value = document.getElementById('date2').value;
+        const resultDiv = document.getElementById('result1');
 
-    if (!date1Value) {
-        resultDiv.innerHTML = "Please enter the first date.";
-        return;
-    }
-
-    const date1 = parseDate(date1Value);
-    if (!date1) {
-        resultDiv.innerHTML = "Please enter the first date in dd/mm/yyyy format.";
-        return;
-    }
-
-    let messages = [];
-
-    // Calculate difference between date1 and today
-    const today = new Date();
-    let diffWithToday = calculateDateDifference(date1, today);
-
-    let durationMessage = formatDurationMessage(diffWithToday);
-    if (diffWithToday.isPast) {
-        messages.push(`${durationMessage} have passed since ${formatUKDate(date1)}.`);
-    } else {
-        messages.push(`${durationMessage} left until ${formatUKDate(date1)}.`);
-    }
-
-    // If date2 is provided, calculate difference between date1 and date2
-    if (date2Value) {
-        const date2 = parseDate(date2Value);
-        if (!date2) {
-            resultDiv.innerHTML = "Please enter the second date in dd/mm/yyyy format.";
+        if (!date1Value) {
+            resultDiv.innerHTML = "Please enter the first date.";
             return;
         }
-        let diffBetweenDates = calculateDateDifference(date1, date2);
 
-        let durationBetweenMessage = formatDurationMessage(diffBetweenDates);
-        messages.push(`${durationBetweenMessage} between ${formatUKDate(date1)} and ${formatUKDate(date2)}.`);
+        const date1 = parseDate(date1Value);
+        if (!date1) {
+            resultDiv.innerHTML = "Please enter the first date in dd/mm/yyyy format.";
+            return;
+        }
+
+        let messages = [];
+
+        // Calculate difference between date1 and today
+        const today = new Date();
+        let diffWithToday = calculateDateDifference(date1, today);
+
+        let durationMessage = formatDurationMessage(diffWithToday);
+        if (diffWithToday.isPast) {
+            messages.push(`${durationMessage} have passed since ${formatUKDate(date1)}.`);
+        } else {
+            messages.push(`${durationMessage} left until ${formatUKDate(date1)}.`);
+        }
+
+        // If date2 is provided, calculate difference between date1 and date2
+        if (date2Value) {
+            const date2 = parseDate(date2Value);
+            if (!date2) {
+                resultDiv.innerHTML = "Please enter the second date in dd/mm/yyyy format.";
+                return;
+            }
+            let diffBetweenDates = calculateDateDifference(date1, date2);
+
+            let durationBetweenMessage = formatDurationMessage(diffBetweenDates);
+            messages.push(`${durationBetweenMessage} between ${formatUKDate(date1)} and ${formatUKDate(date2)}.`);
+        }
+
+        resultDiv.innerHTML = messages.join('<br>');
     }
 
-    resultDiv.innerHTML = messages.join('<br>');
-}
+    // Helper function to format duration message
+    function formatDurationMessage(diff) {
+        let parts = [];
 
-// Helper function to format duration message
-function formatDurationMessage(diff) {
-    let parts = [];
+        if (diff.years > 0) {
+            parts.push(`${diff.years} ${diff.years === 1 ? 'year' : 'years'}`);
+        }
+        if (diff.months > 0) {
+            parts.push(`${diff.months} ${diff.months === 1 ? 'month' : 'months'}`);
+        }
+        if (diff.days > 0) {
+            parts.push(`${diff.days} ${diff.days === 1 ? 'day' : 'days'}`);
+        }
 
-    if (diff.years > 0) {
-        parts.push(`${diff.years} ${diff.years === 1 ? 'year' : 'years'}`);
-    }
-    if (diff.months > 0) {
-        parts.push(`${diff.months} ${diff.months === 1 ? 'month' : 'months'}`);
-    }
-    if (diff.days > 0) {
-        parts.push(`${diff.days} ${diff.days === 1 ? 'day' : 'days'}`);
-    }
+        // If all units are zero, display "0 days"
+        if (parts.length === 0) {
+            parts.push('0 days');
+        }
 
-    // If all units are zero, display "0 days"
-    if (parts.length === 0) {
-        parts.push('0 days');
-    }
-
-    return parts.join(', ');
-}
-
-// Helper function to parse date from dd/mm/yyyy format
-function parseDate(dateStr) {
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return null;
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1; // Months are zero-based
-    const year = parseInt(parts[2], 10);
-    const date = new Date(year, month, day);
-    if (date && date.getMonth() === month && date.getDate() === day && date.getFullYear() === year) {
-        return date;
-    }
-    return null;
-}
-
-// Helper function to calculate date difference and return an object with years, months, days
-function calculateDateDifference(startDate, endDate) {
-    let isPast = endDate >= startDate;
-
-    let start = new Date(startDate);
-    let end = new Date(endDate);
-
-    if (!isPast) {
-        // Swap dates if endDate is before startDate
-        [start, end] = [end, start];
+        return parts.join(', ');
     }
 
-    let years = end.getFullYear() - start.getFullYear();
-    let months = end.getMonth() - start.getMonth();
-    let days = end.getDate() - start.getDate();
-
-    if (days < 0) {
-        months--;
-        days += new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+    // Helper function to parse date from dd/mm/yyyy format
+    function parseDate(dateStr) {
+        const parts = dateStr.split('/');
+        if (parts.length !== 3) return null;
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Months are zero-based
+        const year = parseInt(parts[2], 10);
+        const date = new Date(year, month, day);
+        if (date && date.getMonth() === month && date.getDate() === day && date.getFullYear() === year) {
+            return date;
+        }
+        return null;
     }
-    if (months < 0) {
-        years--;
-        months += 12;
+
+    // Helper function to calculate date difference and return an object with years, months, days
+    function calculateDateDifference(startDate, endDate) {
+        let isPast = endDate >= startDate;
+
+        let start = new Date(startDate);
+        let end = new Date(endDate);
+
+        if (!isPast) {
+            // Swap dates if endDate is before startDate
+            [start, end] = [end, start];
+        }
+
+        let years = end.getFullYear() - start.getFullYear();
+        let months = end.getMonth() - start.getMonth();
+        let days = end.getDate() - start.getDate();
+
+        if (days < 0) {
+            months--;
+            const previousMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+            days += previousMonth.getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        return {
+            years: years,
+            months: months,
+            days: days,
+            isPast: isPast
+        };
     }
-
-    return {
-        years: years,
-        months: months,
-        days: days,
-        isPast: isPast
-    };
-}
-
-// Existing code...
 
     // Function to adjust date inputs
     function adjustDate(dateFieldId, unit, amount) {
@@ -647,7 +749,9 @@ function calculateDateDifference(startDate, endDate) {
         const datepicker = document.createElement('div');
         datepicker.className = 'datepicker';
 
-        // Position the datepicker
+        // Position the datepicker relative to the input
+        const inputRect = input.getBoundingClientRect();
+        const calculatorRect = calculator.getBoundingClientRect();
         datepicker.style.top = (input.offsetTop + input.offsetHeight + 5) + 'px';
         datepicker.style.left = input.offsetLeft + 'px';
 
@@ -672,9 +776,38 @@ function calculateDateDifference(startDate, endDate) {
             const header = document.createElement('div');
             header.style.textAlign = 'center';
             header.style.marginBottom = '5px';
+            header.style.display = 'flex';
+            header.style.justifyContent = 'center';
+            header.style.alignItems = 'center';
 
+            // Previous Year Button
+            const prevYearButton = document.createElement('button');
+            prevYearButton.textContent = '<<';
+            // Option 1: Using inline styles
+            /*
+            prevYearButton.style.marginRight = '5px';
+            prevYearButton.style.padding = '2px 5px';
+            prevYearButton.style.fontSize = '14px';
+            */
+            // Option 2: Using CSS classes
+            // prevYearButton.className = 'nav-button';
+            prevYearButton.onclick = function (event) {
+                event.stopPropagation();
+                currentYear--;
+                buildDatePicker();
+            };
+
+            // Previous Month Button
             const prevButton = document.createElement('button');
             prevButton.textContent = '<';
+            // Option 1: Using inline styles
+            /*
+            prevButton.style.marginRight = '10px';
+            prevButton.style.padding = '2px 5px';
+            prevButton.style.fontSize = '14px';
+            */
+            // Option 2: Using CSS classes
+            // prevButton.className = 'nav-button';
             prevButton.onclick = function (event) {
                 event.stopPropagation();
                 currentMonth--;
@@ -684,9 +817,26 @@ function calculateDateDifference(startDate, endDate) {
                 }
                 buildDatePicker();
             };
+
+            // Month and Year Display
+            const monthYear = document.createElement('span');
+            monthYear.textContent = `${getMonthName(currentMonth)} ${currentYear}`;
+            monthYear.style.margin = '0 10px';
+            monthYear.style.flexGrow = '1';
+            monthYear.style.textAlign = 'center';
+            monthYear.style.fontWeight = 'bold';
+
+            // Next Month Button
             const nextButton = document.createElement('button');
             nextButton.textContent = '>';
-            nextButton.style.marginLeft = '5px';
+            // Option 1: Using inline styles
+            /*
+            nextButton.style.marginLeft = '10px';
+            nextButton.style.padding = '2px 5px';
+            nextButton.style.fontSize = '14px';
+            */
+            // Option 2: Using CSS classes
+            // nextButton.className = 'nav-button';
             nextButton.onclick = function (event) {
                 event.stopPropagation();
                 currentMonth++;
@@ -696,13 +846,30 @@ function calculateDateDifference(startDate, endDate) {
                 }
                 buildDatePicker();
             };
-            const monthYear = document.createElement('span');
-            monthYear.textContent = `${getMonthName(currentMonth)} ${currentYear}`;
-            monthYear.style.margin = '0 10px';
 
+            // Next Year Button
+            const nextYearButton = document.createElement('button');
+            nextYearButton.textContent = '>>';
+            // Option 1: Using inline styles
+            /*
+            nextYearButton.style.marginLeft = '5px';
+            nextYearButton.style.padding = '2px 5px';
+            nextYearButton.style.fontSize = '14px';
+            */
+            // Option 2: Using CSS classes
+            // nextYearButton.className = 'nav-button';
+            nextYearButton.onclick = function (event) {
+                event.stopPropagation();
+                currentYear++;
+                buildDatePicker();
+            };
+
+            // Append all elements to header
+            header.appendChild(prevYearButton);
             header.appendChild(prevButton);
             header.appendChild(monthYear);
             header.appendChild(nextButton);
+            header.appendChild(nextYearButton);
             datepicker.appendChild(header);
 
             const table = document.createElement('table');
