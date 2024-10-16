@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en-gb">
 <head>
     <meta charset="UTF-8">
@@ -185,26 +185,42 @@
             top: -3px;
         }
 
-        /* **New CSS Class for Navigation Buttons (Optional)** */
-        /* Uncomment if using CSS classes for navigation buttons */
-
-        /*
-        .nav-button {
-            margin: 2px;
-            padding: 2px 5px;
-            font-size: 14px;
-            border: 1px solid #007bff;
-            background-color: white;
-            color: #007bff;
-            border-radius: 3px;
-            cursor: pointer;
+        /* **Mortgage Calculator Styles** */
+        .mortgage-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-end;
+            margin-bottom: 10px;
         }
 
-        .nav-button:hover {
-            background-color: #007bff;
-            color: white;
+        .mortgage-inputs .input-group {
+            flex: 1;
+            min-width: 120px;
         }
-        */
+
+        .mortgage-inputs .input-group label {
+            margin: 0 0 5px;
+        }
+
+/* **Mortgage Calculator Styles** */
+.mortgage-loan-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+.mortgage-loan-group .input-group {
+    flex: 1;
+    min-width: 120px;
+}
+
+.mortgage-loan-group button {
+    height: 35px;
+    margin-top: 22px;
+}
 
         /* **Optional: Enhance Mobile Experience** */
         @media (max-width: 767px) {
@@ -212,6 +228,11 @@
                 width: 100%;
                 margin-bottom: 20px;
                 /* min-width: auto; Already handled by grid-template-columns */
+            }
+            .mortgage-inputs,
+            .mortgage-loan-group {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -342,12 +363,41 @@
         <div class="result" id="result6"></div>
     </div>
 
+<!-- Calculator 7: Mortgage Payment Calculator -->
+<div class="calculator" id="calculator7">
+    <h2>Mortgage Payment Calculator</h2>
+    <div id="loanAmountsContainer">
+        <!-- Loan Amount inputs will be added here dynamically -->
+        <div class="mortgage-loan-group" data-index="0">
+            <div class="input-group">
+                <label for="loanAmount0">Loan Amount (£):</label>
+                <input type="number" id="loanAmount0" min="0" step="0.01">
+            </div>
+            <div class="input-group">
+                <label for="term0">Term (years):</label>
+                <input type="number" id="term0" min="0" step="1">
+            </div>
+            <div class="input-group">
+                <label for="interestRate0">Interest Rate (%):</label>
+                <input type="number" id="interestRate0" min="0" step="0.01">
+            </div>
+        </div>
+    </div>
+    <div class="input-group">
+        <button onclick="addLoanAmount()">+ Add Loan</button>
+    </div>
+    <!-- Add the checkbox here -->
+    <label>
+        <input type="checkbox" id="includeInterestOnly" checked>
+        Include Interest-Only Payments
+    </label>
+    <div class="result" id="result7"></div>
 </div>
+
 
 <script>
     // **JavaScript Functions**
-    // [Your existing JavaScript code remains unchanged]
-    
+
     // Reset function
     function resetAll() {
         // Reset all input fields to their initial values
@@ -364,12 +414,10 @@
                     input.value = '16.95';
                 } else if (input.id === 'numberOfChildren') {
                     input.value = '1';
-                } else if (input.id === 'valuationAmount') {
-                    input.value = '';
-                } else if (input.id === 'loanAmountLTV') {
-                    input.value = '';
-                } else if (input.id === 'ltvPercentage') {
-                    input.value = '';
+                } else if (input.id === 'term') {
+                    input.value = '25';
+                } else if (input.id === 'interestRate') {
+                    input.value = '3.5';
                 } else {
                     input.value = '';
                 }
@@ -377,6 +425,17 @@
                 input.value = '';
             }
         });
+
+        // Remove additional loan amount inputs
+        const loanAmountsContainer = document.getElementById('loanAmountsContainer');
+        loanAmountsContainer.innerHTML = `
+            <div class="mortgage-loan-group" data-index="0">
+                <div class="input-group">
+                    <label for="loanAmount0">Loan Amount (£):</label>
+                    <input type="number" id="loanAmount0" min="0" step="0.01">
+                </div>
+            </div>
+        `;
 
         // Clear all result divs
         const results = document.querySelectorAll('.result');
@@ -394,6 +453,7 @@
         calculateChildBenefit();
         calculateLTV();
         calculateMaxTerm();
+        calculateMortgagePayments();
     }
 
     // Calculator 1: How long ago/until
@@ -732,6 +792,116 @@
         resultDiv.innerHTML = message;
     }
 
+
+
+  // Calculator 7: Mortgage Payment Calculator
+let loanIndex = 0;
+
+function addLoanAmount() {
+    loanIndex++;
+
+    // Get values from the last loan input fields
+    const lastIndex = loanIndex - 1;
+    const lastLoanAmount = document.getElementById(`loanAmount${lastIndex}`)?.value || '';
+    const lastTermValue = document.getElementById(`term${lastIndex}`)?.value || '';
+    const lastInterestRateValue = document.getElementById(`interestRate${lastIndex}`)?.value || '';
+
+    const loanAmountsContainer = document.getElementById('loanAmountsContainer');
+
+    const loanGroup = document.createElement('div');
+    loanGroup.className = 'mortgage-loan-group';
+    loanGroup.setAttribute('data-index', loanIndex);
+
+    loanGroup.innerHTML = `
+        <div class="input-group">
+            <label for="loanAmount${loanIndex}">Loan Amount (£):</label>
+            <input type="number" id="loanAmount${loanIndex}" min="0" step="0.01" value="${lastLoanAmount}">
+        </div>
+        <div class="input-group">
+            <label for="term${loanIndex}">Term (years):</label>
+            <input type="number" id="term${loanIndex}" min="0" step="1" value="${lastTermValue}">
+        </div>
+        <div class="input-group">
+            <label for="interestRate${loanIndex}">Interest Rate (%):</label>
+            <input type="number" id="interestRate${loanIndex}" min="0" step="0.01" value="${lastInterestRateValue}">
+        </div>
+        <button onclick="removeLoanAmount(${loanIndex})">Remove</button>
+    `;
+
+    loanAmountsContainer.appendChild(loanGroup);
+
+    // Add event listeners to new inputs
+    document.getElementById(`loanAmount${loanIndex}`).addEventListener('input', calculateMortgagePayments);
+    document.getElementById(`term${loanIndex}`).addEventListener('input', calculateMortgagePayments);
+    document.getElementById(`interestRate${loanIndex}`).addEventListener('input', calculateMortgagePayments);
+
+    // Recalculate with new loan added
+    calculateMortgagePayments();
+}
+
+
+
+function removeLoanAmount(index) {
+    const loanGroup = document.querySelector(`.mortgage-loan-group[data-index='${index}']`);
+    if (loanGroup) {
+        loanGroup.parentNode.removeChild(loanGroup);
+        calculateMortgagePayments();
+    }
+}
+
+
+
+function calculateMortgagePayments() {
+    const resultDiv = document.getElementById('result7');
+    const includeInterestOnly = document.getElementById('includeInterestOnly').checked;
+    let messages = [];
+
+    const loanGroups = document.querySelectorAll(`#loanAmountsContainer .mortgage-loan-group`);
+
+    loanGroups.forEach((group, idx) => {
+        const index = group.getAttribute('data-index');
+        const loanAmount = parseFloat(document.getElementById(`loanAmount${index}`).value);
+        const term = parseFloat(document.getElementById(`term${index}`).value);
+        const interestRate = parseFloat(document.getElementById(`interestRate${index}`).value) / 100 / 12;
+
+        if (!loanAmount || !term || !interestRate) return;
+
+        const numberOfPayments = term * 12;
+
+        // Mortgage Payment Calculation
+        const numerator = loanAmount * interestRate * Math.pow(1 + interestRate, numberOfPayments);
+        const denominator = Math.pow(1 + interestRate, numberOfPayments) - 1;
+        const mortgagePayment = numerator / denominator;
+
+        let message = `Loan ${idx + 1}: Mortgage Payment: £${mortgagePayment.toFixed(2)}`;
+
+        if (includeInterestOnly) {
+            // Interest-Only Payment (monthly)
+            const interestOnlyPayment = loanAmount * interestRate;
+            message += `<br>Interest-Only Payment: £${interestOnlyPayment.toFixed(2)}`;
+        }
+
+        messages.push(message);
+    });
+
+    if (messages.length === 0) {
+        resultDiv.innerHTML = 'Please enter at least one Loan Amount, Term, and Interest Rate.';
+        return;
+    }
+
+    resultDiv.innerHTML = messages.join('<br><br>');
+}
+
+
+// Event listeners for Mortgage Calculator
+// Event listeners for Mortgage Calculator
+document.getElementById('loanAmount0').addEventListener('input', calculateMortgagePayments);
+document.getElementById('term0').addEventListener('input', calculateMortgagePayments);
+document.getElementById('interestRate0').addEventListener('input', calculateMortgagePayments);
+document.getElementById('includeInterestOnly').addEventListener('change', calculateMortgagePayments);
+
+
+
     // Helper function to format date in UK format
     function formatUKDate(date) {
         const day = ('0' + date.getDate()).slice(-2);
@@ -987,6 +1157,7 @@
     calculateChildBenefit();
     calculateLTV();
     calculateMaxTerm();
+    calculateMortgagePayments();
 </script>
 
 </body>
